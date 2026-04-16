@@ -1,0 +1,27 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 280">
+  <defs>
+    <linearGradient id="bg2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#3f3f46"/>
+      <stop offset="100%" stop-color="#1f1f24"/>
+    </linearGradient>
+  </defs>
+  <rect width="480" height="280" fill="#f4f5f8"/>
+  <g transform="translate(38,36)">
+    <rect width="360" height="190" rx="14" fill="url(#bg2)"/>
+    <rect x="20" y="22" width="108" height="30" rx="6" fill="#2a2a33"/>
+    <rect x="220" y="22" width="112" height="30" rx="6" fill="#2a2a33"/>
+    <rect x="125" y="68" width="106" height="66" rx="8" fill="#27272f" stroke="#999" stroke-width="2"/>
+    <rect x="160" y="84" width="36" height="34" rx="6" fill="#d9d9dc"/>
+    <circle cx="26" cy="164" r="7" fill="#b28f47"/>
+    <circle cx="72" cy="164" r="7" fill="#b28f47"/>
+    <circle cx="118" cy="164" r="7" fill="#b28f47"/>
+    <circle cx="164" cy="164" r="7" fill="#b28f47"/>
+    <circle cx="210" cy="164" r="7" fill="#b28f47"/>
+    <circle cx="256" cy="164" r="7" fill="#b28f47"/>
+    <circle cx="302" cy="164" r="7" fill="#b28f47"/>
+    <circle cx="348" cy="164" r="7" fill="#b28f47"/>
+    <text x="178" y="48" text-anchor="middle" fill="#fff" font-size="28" font-family="Segoe UI, Arial" font-weight="700">SHT31</text>
+    <text x="178" y="62" text-anchor="middle" fill="#ccd" font-size="14" font-family="Segoe UI, Arial">Temp &amp; Humidity</text>
+  </g>
+  <text x="240" y="255" text-anchor="middle" fill="#313242" font-size="20" font-family="Segoe UI, Arial">SHT31 Temperature &amp; Humidity Sensor</text>
+</svg>
