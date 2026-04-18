@@ -402,6 +402,9 @@ button:active:enabled {
   gap: 16px;
   margin-bottom: 16px;
 }
+.kpi-grid-five {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
 .kpi-card {
   background: #fff;
   border: 1px solid #dde3ee;
@@ -418,6 +421,11 @@ button:active:enabled {
 }
 .kpi-title { color: #6a7386; margin: 10px 0 4px; }
 .kpi-value { font-size: 2.7rem; margin: 0 0 14px; font-weight: 700; }
+.kpi-detail {
+  margin: -8px 0 14px;
+  color: #6a7386;
+  font-size: 0.92rem;
+}
 .kpi-track { height: 7px; border-radius: 999px; background: #e8edf7; overflow: hidden; }
 .kpi-track span { display: block; height: 100%; border-radius: 999px; }
 
@@ -426,6 +434,9 @@ button:active:enabled {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
   margin-bottom: 16px;
+}
+.chart-grid-three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 .panel {
   background: #fff;
@@ -570,6 +581,7 @@ th { font-weight: 700; background: #f7f9ff; }
 
 .dot-legend.dust { background: #8f52ff; }
 .dot-legend.humidity { background: #2f6fed; }
+.dot-legend.solar { background: #f3a712; }
 .dot-legend.cleaning { background: #88d9b0; }
 
 .hero {

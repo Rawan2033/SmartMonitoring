@@ -63,17 +63,10 @@ export default function SettingsPage(): JSX.Element {
               onChange={(e) => onChange("cleaningDustThreshold", Number(e.target.value))}
             />
           </label>
-          <label className="settings-field">
-            <span>Voltage threshold for cleaning active (kV)</span>
-            <input
-              type="number"
-              min={0}
-              max={2}
-              step={0.01}
-              value={form.voltageOnThreshold}
-              onChange={(e) => onChange("voltageOnThreshold", Number(e.target.value))}
-            />
-          </label>
+          <div className="settings-field">
+            <span>Cleaning signal mode</span>
+            <input type="text" value="Real ESP 0/1 cleaning state" disabled />
+          </div>
         </div>
       </article>
 

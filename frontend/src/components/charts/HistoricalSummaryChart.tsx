@@ -14,7 +14,7 @@ export default function HistoricalSummaryChart({ data }: HistoricalSummaryChartP
 
     const width = 620;
     const height = 240;
-    const margin = { top: 20, right: 46, bottom: 34, left: 40 };
+    const margin = { top: 20, right: 52, bottom: 34, left: 40 };
 
     const svg = d3.select(ref.current);
     svg.selectAll("*").remove();
@@ -28,7 +28,7 @@ export default function HistoricalSummaryChart({ data }: HistoricalSummaryChartP
     const yLeft = d3.scaleLinear().domain([0, 100]).nice().range([height - margin.bottom, margin.top]);
     const yRight = d3
       .scaleLinear()
-      .domain([0, Math.max(1, d3.max(data, (d) => d.cleaningActiveCount) ?? 1)])
+      .domain([0, Math.max(1, d3.max(data, (d) => Math.max(d.cleaningActiveCount, d.avgSolarPowerMw)) ?? 1)])
       .nice()
       .range([height - margin.bottom, margin.top]);
 
@@ -68,23 +68,38 @@ export default function HistoricalSummaryChart({ data }: HistoricalSummaryChartP
       .y((d) => yLeft(d.avgHumidityPercent))
       .curve(d3.curveMonotoneX);
 
-    const dustPath = svg
-      .append("path")
-      .datum(data)
-      .attr("fill", "none")
-      .attr("stroke", "#8f52ff")
-      .attr("stroke-width", 2.3)
-      .attr("d", lineDust);
+    const lineSolar = d3
+      .line<HistoricalSummaryPoint>()
+      .x((d) => (x(d.label) ?? 0) + x.bandwidth() / 2)
+      .y((d) => yRight(d.avgSolarPowerMw))
+      .curve(d3.curveMonotoneX);
 
-    const humidityPath = svg
-      .append("path")
-      .datum(data)
-      .attr("fill", "none")
-      .attr("stroke", "#2f6fed")
-      .attr("stroke-width", 2.3)
-      .attr("d", lineHumidity);
+    const paths = [
+      svg
+        .append("path")
+        .datum(data)
+        .attr("fill", "none")
+        .attr("stroke", "#8f52ff")
+        .attr("stroke-width", 2.3)
+        .attr("d", lineDust),
+      svg
+        .append("path")
+        .datum(data)
+        .attr("fill", "none")
+        .attr("stroke", "#2f6fed")
+        .attr("stroke-width", 2.3)
+        .attr("d", lineHumidity),
+      svg
+        .append("path")
+        .datum(data)
+        .attr("fill", "none")
+        .attr("stroke", "#f3a712")
+        .attr("stroke-width", 2.3)
+        .attr("stroke-dasharray", "6 4")
+        .attr("d", lineSolar),
+    ];
 
-    for (const path of [dustPath, humidityPath]) {
+    for (const path of paths) {
       const length = (path.node() as SVGPathElement).getTotalLength();
       path
         .attr("stroke-dasharray", `${length} ${length}`)
@@ -98,30 +113,34 @@ export default function HistoricalSummaryChart({ data }: HistoricalSummaryChartP
     const focus = svg.append("g").style("display", "none");
     const dustDot = focus.append("circle").attr("r", 4.5).attr("fill", "#8f52ff").attr("stroke", "#fff").attr("stroke-width", 1.2);
     const humidityDot = focus.append("circle").attr("r", 4.5).attr("fill", "#2f6fed").attr("stroke", "#fff").attr("stroke-width", 1.2);
+    const solarDot = focus.append("circle").attr("r", 4.5).attr("fill", "#f3a712").attr("stroke", "#fff").attr("stroke-width", 1.2);
     const barDot = focus.append("circle").attr("r", 4.5).attr("fill", "#33ad7b").attr("stroke", "#fff").attr("stroke-width", 1.2);
 
     const tooltip = focus.append("g");
     const tooltipBg = tooltip
       .append("rect")
       .attr("x", 10)
-      .attr("y", -54)
-      .attr("width", 210)
-      .attr("height", 50)
+      .attr("y", -68)
+      .attr("width", 250)
+      .attr("height", 64)
       .attr("rx", 6)
       .attr("fill", "#0f172a")
       .attr("opacity", 0.9);
-    const tooltipLine1 = tooltip.append("text").attr("x", 16).attr("y", -38).attr("fill", "#fff").attr("font-size", 11);
-    const tooltipLine2 = tooltip.append("text").attr("x", 16).attr("y", -24).attr("fill", "#fff").attr("font-size", 11);
-    const tooltipLine3 = tooltip.append("text").attr("x", 16).attr("y", -10).attr("fill", "#fff").attr("font-size", 11);
+    const tooltipLine1 = tooltip.append("text").attr("x", 16).attr("y", -52).attr("fill", "#fff").attr("font-size", 11);
+    const tooltipLine2 = tooltip.append("text").attr("x", 16).attr("y", -38).attr("fill", "#fff").attr("font-size", 11);
+    const tooltipLine3 = tooltip.append("text").attr("x", 16).attr("y", -24).attr("fill", "#fff").attr("font-size", 11);
+    const tooltipLine4 = tooltip.append("text").attr("x", 16).attr("y", -10).attr("fill", "#fff").attr("font-size", 11);
 
     const points = data.map((d) => ({
       x: (x(d.label) ?? 0) + x.bandwidth() / 2,
       yDust: yLeft(d.avgDustPercent),
       yHumidity: yLeft(d.avgHumidityPercent),
+      ySolar: yRight(d.avgSolarPowerMw),
       yBar: yRight(d.cleaningActiveCount),
       label: d.label,
       dust: d.avgDustPercent,
       humidity: d.avgHumidityPercent,
+      solar: d.avgSolarPowerMw,
       cleaning: d.cleaningActiveCount,
     }));
 
@@ -146,19 +165,22 @@ export default function HistoricalSummaryChart({ data }: HistoricalSummaryChartP
 
         dustDot.attr("cx", nearest.x).attr("cy", nearest.yDust);
         humidityDot.attr("cx", nearest.x).attr("cy", nearest.yHumidity);
+        solarDot.attr("cx", nearest.x).attr("cy", nearest.ySolar);
         barDot.attr("cx", nearest.x).attr("cy", nearest.yBar);
 
         tooltip.attr("transform", `translate(${nearest.x},${nearest.yHumidity})`);
         tooltipLine1.text(`${nearest.label}`);
         tooltipLine2.text(`Dust: ${nearest.dust.toFixed(1)}% | Humidity: ${nearest.humidity.toFixed(1)}%`);
-        tooltipLine3.text(`Cleaning Active Count: ${nearest.cleaning}`);
+        tooltipLine3.text(`Solar: ${nearest.solar.toFixed(1)} mW`);
+        tooltipLine4.text(`Cleaning Active Count: ${nearest.cleaning}`);
 
         const maxW = Math.max(
           (tooltipLine1.node() as SVGTextElement).getComputedTextLength(),
           (tooltipLine2.node() as SVGTextElement).getComputedTextLength(),
-          (tooltipLine3.node() as SVGTextElement).getComputedTextLength()
+          (tooltipLine3.node() as SVGTextElement).getComputedTextLength(),
+          (tooltipLine4.node() as SVGTextElement).getComputedTextLength()
         );
-        tooltipBg.attr("width", Math.max(210, maxW + 18));
+        tooltipBg.attr("width", Math.max(250, maxW + 18));
       });
   }, [data]);
 
@@ -167,6 +189,7 @@ export default function HistoricalSummaryChart({ data }: HistoricalSummaryChartP
       <div className="summary-legend">
         <span><i className="dot-legend dust" /> Avg Dust (%)</span>
         <span><i className="dot-legend humidity" /> Avg Humidity (%)</span>
+        <span><i className="dot-legend solar" /> Avg Solar Output (mW)</span>
         <span><i className="dot-legend cleaning" /> Cleaning Active Count</span>
       </div>
       <svg ref={ref} width="100%" viewBox="0 0 620 240" role="img" aria-label="Historical summary trend chart" />

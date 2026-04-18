@@ -6,53 +6,50 @@ from sqlalchemy.orm import Session
 
 from ..database import get_db
 from ..models import SensorReading
-from ..runtime_settings import get_runtime_settings
 from ..schemas import DashboardMetricsOut, TrendPointOut, TriggerEventOut
-from ..seed import is_cleaning_active, mock_voltage_from_reading, status_dust, status_humidity, status_temp
+from ..seed import status_dust, status_humidity, status_solar_power, status_temp
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 
 
 @router.get("/current", response_model=DashboardMetricsOut)
 def get_current_metrics(db: Session = Depends(get_db)):
-    app_settings = get_runtime_settings()
     latest = db.scalar(select(SensorReading).order_by(SensorReading.timestamp.desc()).limit(1))
 
     if latest is None:
         return DashboardMetricsOut(
             dustPercent=0.0,
+            reflectivityRawAvg=0.0,
             temperatureC=0.0,
             humidityPercent=0.0,
-            voltageV=0.0,
+            solarPowerMw=0.0,
             cleaningActive=False,
             statusDust="Low",
             statusTemperature="Cool",
             statusHumidity="Dry",
+            statusSolar="Low",
             statusCleaning="Inactive",
             lastUpdated=datetime.now(),
         )
 
     dust = float(latest.dust_percent)
+    reflectivity = float(latest.reflectivity_raw_avg)
     temp = float(latest.temperature_c)
     humidity = float(latest.humidity_percent)
-    voltage = mock_voltage_from_reading(
-        dust=dust,
-        temp=temp,
-        humidity=humidity,
-        timestamp=latest.timestamp,
-        cleaning_dust_threshold=app_settings.cleaning_dust_threshold,
-    )
-    cleaning_active = is_cleaning_active(voltage, app_settings.voltage_on_threshold)
+    solar_power = float(latest.solar_power_mw)
+    cleaning_active = bool(latest.cleaning_active)
 
     return DashboardMetricsOut(
         dustPercent=dust,
+        reflectivityRawAvg=reflectivity,
         temperatureC=temp,
         humidityPercent=humidity,
-        voltageV=voltage,
+        solarPowerMw=solar_power,
         cleaningActive=cleaning_active,
         statusDust=status_dust(dust),
         statusTemperature=status_temp(temp),
         statusHumidity=status_humidity(humidity),
+        statusSolar=status_solar_power(solar_power),
         statusCleaning="Active" if cleaning_active else "Inactive",
         lastUpdated=latest.timestamp,
     )
@@ -60,7 +57,6 @@ def get_current_metrics(db: Session = Depends(get_db)):
 
 @router.get("/trends", response_model=list[TrendPointOut])
 def get_trends(db: Session = Depends(get_db)):
-    app_settings = get_runtime_settings()
     since = datetime.now() - timedelta(hours=2)
     rows = db.scalars(
         select(SensorReading)
@@ -72,15 +68,11 @@ def get_trends(db: Session = Depends(get_db)):
         TrendPointOut(
             timestamp=row.timestamp,
             dustPercent=float(row.dust_percent),
+            reflectivityRawAvg=float(row.reflectivity_raw_avg),
             temperatureC=float(row.temperature_c),
             humidityPercent=float(row.humidity_percent),
-            voltageV=mock_voltage_from_reading(
-                dust=float(row.dust_percent),
-                temp=float(row.temperature_c),
-                humidity=float(row.humidity_percent),
-                timestamp=row.timestamp,
-                cleaning_dust_threshold=app_settings.cleaning_dust_threshold,
-            ),
+            solarPowerMw=float(row.solar_power_mw),
+            cleaningActive=bool(row.cleaning_active),
         )
         for row in rows
     ]
@@ -88,7 +80,6 @@ def get_trends(db: Session = Depends(get_db)):
 
 @router.get("/events", response_model=list[TriggerEventOut])
 def get_triggered_events(db: Session = Depends(get_db)):
-    app_settings = get_runtime_settings()
     now = datetime.now().replace(minute=0, second=0, microsecond=0)
     start = now - timedelta(hours=23)
 
@@ -100,14 +91,7 @@ def get_triggered_events(db: Session = Depends(get_db)):
 
     counts_by_hour: dict[datetime, int] = {}
     for reading in readings:
-        voltage = mock_voltage_from_reading(
-            dust=float(reading.dust_percent),
-            temp=float(reading.temperature_c),
-            humidity=float(reading.humidity_percent),
-            timestamp=reading.timestamp,
-            cleaning_dust_threshold=app_settings.cleaning_dust_threshold,
-        )
-        if not is_cleaning_active(voltage, app_settings.voltage_on_threshold):
+        if not bool(reading.cleaning_active):
             continue
         hour_bucket = reading.timestamp.replace(minute=0, second=0, microsecond=0)
         counts_by_hour[hour_bucket] = counts_by_hour.get(hour_bucket, 0) + 1

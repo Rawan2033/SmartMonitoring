@@ -53,6 +53,14 @@ def status_humidity(humidity: float) -> str:
     return "Humid"
 
 
+def status_solar_power(power_mw: float) -> str:
+    if power_mw < 250:
+        return "Low"
+    if power_mw < 1000:
+        return "Normal"
+    return "Strong"
+
+
 def mock_voltage_from_reading(
     dust: float,
     temp: float,

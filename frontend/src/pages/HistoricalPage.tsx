@@ -47,7 +47,7 @@ export default function HistoricalPage(): JSX.Element {
 
       <article className="panel">
         <h3>Trend Summary</h3>
-        <p>Daily averages for selected range (weekly/monthly)</p>
+        <p>Daily averages for selected range, including solar output and cleaning activity</p>
         <HistoricalSummaryChart data={summary} />
       </article>
 
@@ -55,17 +55,15 @@ export default function HistoricalPage(): JSX.Element {
         <h3>Events Timeline</h3>
         <div className="timeline">
           {timeline.slice(0, 12).map((item, idx) => (
-            <div key={`${item.date}-${item.time}-${idx}`} className="timeline-item">
+            <div key={`${item.dateTime}-${idx}`} className="timeline-item">
               <span className={`dot ${item.eventType === "Cleaning active" ? "green" : "amber"}`} />
               <div>
                 <strong>{item.eventType}</strong>
                 <p>
-                  Dust: {item.dustPercent.toFixed(1)}% | Temp: {item.temperatureC.toFixed(1)}C | Humidity: {item.humidityPercent.toFixed(1)}% | Voltage: {item.voltageV.toFixed(2)} kV
+                  Dust: {item.dustPercent.toFixed(1)}% | Temp: {item.temperatureC.toFixed(1)}C | Humidity: {item.humidityPercent.toFixed(1)}% | Solar: {item.solarPowerMw.toFixed(1)} mW | Cleaning: {item.cleaningActive ? "On" : "Off"}
                 </p>
               </div>
-              <time>
-                {item.date} {item.time}
-              </time>
+              <time>{item.dateTime}</time>
             </div>
           ))}
         </div>
@@ -77,25 +75,23 @@ export default function HistoricalPage(): JSX.Element {
           <table>
             <thead>
               <tr>
-                <th>Date</th>
-                <th>Time</th>
+                <th>Date-Time</th>
                 <th>Dust (%)</th>
                 <th>Temp (C)</th>
                 <th>Humidity (%)</th>
-                <th>Voltage (kV)</th>
-                <th>Cleaning</th>
+                <th>Cleaning Status</th>
+                <th>Power Output (mW)</th>
               </tr>
             </thead>
             <tbody>
               {records.map((record, idx) => (
-                <tr key={`${record.date}-${record.time}-${idx}`}>
-                  <td>{record.date}</td>
-                  <td>{record.time}</td>
+                <tr key={`${record.dateTime}-${idx}`}>
+                  <td>{record.dateTime}</td>
                   <td>{record.dustPercent.toFixed(1)}</td>
                   <td>{record.temperatureC.toFixed(1)}</td>
                   <td>{record.humidityPercent.toFixed(1)}</td>
-                  <td>{record.voltageV.toFixed(2)}</td>
-                  <td>{record.cleaningActive ? "Active" : "Off"}</td>
+                  <td>{record.cleaningActive ? "On" : "Off"}</td>
+                  <td>{record.solarPowerMw.toFixed(1)}</td>
                 </tr>
               ))}
             </tbody>

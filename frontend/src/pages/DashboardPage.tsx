@@ -3,6 +3,7 @@ import { api } from "../api";
 import KpiCard from "../components/KpiCard";
 import BarEventsChart from "../components/charts/BarEventsChart";
 import LineTrendChart from "../components/charts/LineTrendChart";
+import SolarPowerChart from "../components/charts/SolarPowerChart";
 import type { DashboardMetrics, Insight, RuntimeSettings, TrendPoint, TriggerEvent } from "../types";
 
 export default function DashboardPage(): JSX.Element {
@@ -96,9 +97,7 @@ export default function DashboardPage(): JSX.Element {
     <section>
       <div className="dashboard-top-row animate-in">
         <div className="status-row">
-          <span className="pill">
-            Auto-refresh: {refreshIntervalLabel}
-          </span>
+          <span className="pill">Auto-refresh: {refreshIntervalLabel}</span>
           <span className="pill">Last updated: {refreshLabel}</span>
         </div>
       </div>
@@ -114,10 +113,11 @@ export default function DashboardPage(): JSX.Element {
         <span className="dashboard-title-wave" aria-hidden />
       </div>
 
-      <div className="kpi-grid">
+      <div className="kpi-grid kpi-grid-five">
         <KpiCard
           title="Soiling / Dust Index"
           value={`${metrics?.dustPercent.toFixed(1) ?? "0.0"}%`}
+          detail={`Avg raw reading: ${metrics?.reflectivityRawAvg.toFixed(0) ?? "0"} / 4095`}
           status={metrics?.statusDust ?? "Moderate"}
           accent="#8f52ff"
           animationDelayMs={60}
@@ -137,28 +137,41 @@ export default function DashboardPage(): JSX.Element {
           animationDelayMs={200}
         />
         <KpiCard
-          title="Cleaning Voltage (kV)"
-          value={`${metrics?.voltageV.toFixed(2) ?? "0.00"} kV`}
+          title="Cleaning Active"
+          value={metrics?.cleaningActive ? "On" : "Off"}
+          detail="Real ESP cleaning state (0/1)"
           status={metrics?.statusCleaning ?? "Inactive"}
           accent={metrics?.cleaningActive ? "#13a85e" : "#7b879d"}
           animationDelayMs={270}
         />
+        <KpiCard
+          title="Solar Power Output"
+          value={`${metrics?.solarPowerMw.toFixed(1) ?? "0.0"} mW`}
+          status={metrics?.statusSolar ?? "Low"}
+          accent="#f3a712"
+          animationDelayMs={340}
+        />
       </div>
 
-      <div className="chart-grid">
+      <div className="chart-grid chart-grid-three">
         <article className="panel animate-in" style={{ animationDelay: "260ms" }}>
           <h3>Sensor Trends</h3>
-          <p>Last 2 hours (5-minute intervals)</p>
+          <p>Dust, humidity, and temperature over the last 2 hours</p>
           <LineTrendChart data={trends} />
         </article>
         <article className="panel animate-in" style={{ animationDelay: "320ms" }}>
           <h3>Triggered Events</h3>
-          <p>Cleaning events triggered (Last 24 hours)</p>
+          <p>Cleaning-active counts grouped by hour (Last 24 hours)</p>
           <BarEventsChart data={events} />
+        </article>
+        <article className="panel animate-in" style={{ animationDelay: "380ms" }}>
+          <h3>Solar Power Output</h3>
+          <p>Power output trend from the INA219 sensor</p>
+          <SolarPowerChart data={trends} />
         </article>
       </div>
 
-      <article className="insights animate-in" style={{ animationDelay: "360ms" }}>
+      <article className="insights animate-in" style={{ animationDelay: "420ms" }}>
         <div className="insights-head">
           <div>
             <h3>AI Insight Summary</h3>

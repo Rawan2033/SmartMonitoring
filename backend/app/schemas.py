@@ -6,13 +6,15 @@ from pydantic import BaseModel
 
 class DashboardMetricsOut(BaseModel):
     dustPercent: float
+    reflectivityRawAvg: float
     temperatureC: float
     humidityPercent: float
-    voltageV: float
+    solarPowerMw: float
     cleaningActive: bool
     statusDust: Literal["Low", "Moderate", "High"]
     statusTemperature: Literal["Cool", "Normal", "High"]
     statusHumidity: Literal["Dry", "Normal", "Humid"]
+    statusSolar: Literal["Low", "Normal", "Strong"]
     statusCleaning: Literal["Active", "Inactive"]
     lastUpdated: datetime
 
@@ -20,9 +22,11 @@ class DashboardMetricsOut(BaseModel):
 class TrendPointOut(BaseModel):
     timestamp: datetime
     dustPercent: float
+    reflectivityRawAvg: float
     temperatureC: float
     humidityPercent: float
-    voltageV: float
+    solarPowerMw: float
+    cleaningActive: bool
 
 
 class TriggerEventOut(BaseModel):
@@ -36,13 +40,12 @@ class InsightOut(BaseModel):
 
 
 class HistoricalRecordOut(BaseModel):
-    date: str
-    time: str
+    dateTime: str
     dustPercent: float
     temperatureC: float
     humidityPercent: float
-    voltageV: float
     cleaningActive: bool
+    solarPowerMw: float
     eventType: Literal["Monitoring", "Cleaning active"]
 
 
@@ -50,6 +53,7 @@ class HistoricalSummaryPointOut(BaseModel):
     label: str
     avgDustPercent: float
     avgHumidityPercent: float
+    avgSolarPowerMw: float
     cleaningActiveCount: int
 
 

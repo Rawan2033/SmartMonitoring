@@ -1,8 +1,9 @@
-﻿type KpiCardProps = {
+type KpiCardProps = {
   title: string;
   value: string;
   status: string;
   accent: string;
+  detail?: string;
   animationDelayMs?: number;
 };
 
@@ -11,6 +12,7 @@ export default function KpiCard({
   value,
   status,
   accent,
+  detail,
   animationDelayMs = 0
 }: KpiCardProps): JSX.Element {
   return (
@@ -22,6 +24,7 @@ export default function KpiCard({
       </div>
       <p className="kpi-title">{title}</p>
       <p className="kpi-value">{value}</p>
+      {detail ? <p className="kpi-detail">{detail}</p> : null}
       <div className="kpi-track">
         <span style={{ width: "42%", background: accent }} />
       </div>

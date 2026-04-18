@@ -7,7 +7,6 @@ from sqlalchemy.orm import Session
 from ..database import get_db
 from ..models import SensorReading
 from ..runtime_settings import get_runtime_settings
-from ..seed import is_cleaning_active, mock_voltage_from_reading
 from ..services.insights import generate_insights_from_openai
 
 router = APIRouter(prefix="/insights", tags=["insights"])
@@ -57,18 +56,6 @@ def generate_insights(request: Request, db: Session = Depends(get_db)):
     ).all()
 
     latest = readings[-1] if readings else None
-    latest_voltage = (
-        mock_voltage_from_reading(
-            dust=float(latest.dust_percent),
-            temp=float(latest.temperature_c),
-            humidity=float(latest.humidity_percent),
-            timestamp=latest.timestamp,
-            cleaning_dust_threshold=app_settings.cleaning_dust_threshold,
-        )
-        if latest
-        else 0.0
-    )
-
     events_count = 0
     readings_24h = db.scalars(
         select(SensorReading)
@@ -76,40 +63,28 @@ def generate_insights(request: Request, db: Session = Depends(get_db)):
         .order_by(SensorReading.timestamp.asc())
     ).all()
     for row in readings_24h:
-        voltage = mock_voltage_from_reading(
-            dust=float(row.dust_percent),
-            temp=float(row.temperature_c),
-            humidity=float(row.humidity_percent),
-            timestamp=row.timestamp,
-            cleaning_dust_threshold=app_settings.cleaning_dust_threshold,
-        )
-        if is_cleaning_active(voltage, app_settings.voltage_on_threshold):
+        if bool(row.cleaning_active):
             events_count += 1
 
     context = {
         "latest": {
             "dust_percent": float(latest.dust_percent) if latest else None,
+            "reflectivity_raw_avg": float(latest.reflectivity_raw_avg) if latest else None,
             "temperature_c": float(latest.temperature_c) if latest else None,
             "humidity_percent": float(latest.humidity_percent) if latest else None,
-            "voltage_v": latest_voltage if latest else None,
-            "cleaning_active": is_cleaning_active(latest_voltage, app_settings.voltage_on_threshold)
-            if latest
-            else None,
+            "solar_power_mw": float(latest.solar_power_mw) if latest else None,
+            "cleaning_active": bool(latest.cleaning_active) if latest else None,
             "timestamp": latest.timestamp.isoformat() if latest else None,
         },
         "recent_trends": [
             {
                 "timestamp": row.timestamp.isoformat(),
                 "dust_percent": float(row.dust_percent),
+                "reflectivity_raw_avg": float(row.reflectivity_raw_avg),
                 "temperature_c": float(row.temperature_c),
                 "humidity_percent": float(row.humidity_percent),
-                "voltage_v": mock_voltage_from_reading(
-                    dust=float(row.dust_percent),
-                    temp=float(row.temperature_c),
-                    humidity=float(row.humidity_percent),
-                    timestamp=row.timestamp,
-                    cleaning_dust_threshold=app_settings.cleaning_dust_threshold,
-                ),
+                "solar_power_mw": float(row.solar_power_mw),
+                "cleaning_active": bool(row.cleaning_active),
             }
             for row in readings
         ],

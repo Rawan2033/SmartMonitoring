@@ -15,6 +15,8 @@ class IngestReadingIn(BaseModel):
     humidity_percent: float = Field(..., ge=0, le=100)
     dust_percent: float | None = Field(default=None, ge=0, le=100)
     tcrt_raw: int | None = Field(default=None, ge=0, le=4095)
+    solar_power_mw: float = Field(default=0.0, ge=0)
+    cleaning_active: int = Field(default=0, ge=0, le=1)
     timestamp: datetime | None = None
 
     @model_validator(mode="after")
@@ -41,8 +43,11 @@ def ingest_reading(payload: IngestReadingIn, db: Session = Depends(get_db)):
     row = SensorReading(
         timestamp=payload.timestamp or datetime.now(),
         dust_percent=float(dust_value),
+        reflectivity_raw_avg=float(payload.tcrt_raw or 0),
         temperature_c=float(payload.temperature_c),
         humidity_percent=float(payload.humidity_percent),
+        solar_power_mw=float(payload.solar_power_mw),
+        cleaning_active=int(payload.cleaning_active),
     )
 
     db.add(row)
@@ -53,7 +58,10 @@ def ingest_reading(payload: IngestReadingIn, db: Session = Depends(get_db)):
         "saved": {
             "timestamp": row.timestamp.isoformat(),
             "dust_percent": float(row.dust_percent),
+            "reflectivity_raw_avg": float(row.reflectivity_raw_avg),
             "temperature_c": float(row.temperature_c),
             "humidity_percent": float(row.humidity_percent),
+            "solar_power_mw": float(row.solar_power_mw),
+            "cleaning_active": int(row.cleaning_active),
         },
     }
