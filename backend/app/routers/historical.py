@@ -1,6 +1,6 @@
 ﻿from datetime import datetime, timedelta
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -19,6 +19,35 @@ def _range_to_hours(range_value: str) -> int:
     return 30 * 24
 
 
+def _resolve_since(range_value: str, start_date: str | None, end_date: str | None) -> datetime:
+    if range_value != "custom":
+        hours = _range_to_hours(range_value)
+        return datetime.now() - timedelta(hours=hours)
+
+    if not start_date or not end_date:
+        raise HTTPException(status_code=400, detail="Custom range requires start_date and end_date.")
+
+    try:
+        start = datetime.strptime(start_date, "%Y-%m-%d")
+        end = datetime.strptime(end_date, "%Y-%m-%d")
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail="Dates must be in YYYY-MM-DD format.") from exc
+
+    if start > end:
+        raise HTTPException(status_code=400, detail="start_date must be before or equal to end_date.")
+
+    return start
+
+
+def _resolve_until(range_value: str, end_date: str | None) -> datetime:
+    if range_value != "custom":
+        return datetime.now()
+
+    assert end_date is not None
+    end = datetime.strptime(end_date, "%Y-%m-%d")
+    return end + timedelta(days=1)
+
+
 def _to_record(item: SensorReading, event_type: str) -> HistoricalRecordOut:
     return HistoricalRecordOut(
         dateTime=item.timestamp.strftime("%Y-%m-%d %I:%M %p"),
@@ -34,14 +63,17 @@ def _to_record(item: SensorReading, event_type: str) -> HistoricalRecordOut:
 @router.get("/records", response_model=list[HistoricalRecordOut])
 def get_records(
     range: str = Query("week", pattern="^(week|month|custom)$"),
+    start_date: str | None = Query(default=None),
+    end_date: str | None = Query(default=None),
     db: Session = Depends(get_db),
 ):
-    hours = _range_to_hours(range)
-    since = datetime.now() - timedelta(hours=hours)
+    since = _resolve_since(range, start_date, end_date)
+    until = _resolve_until(range, end_date)
 
     rows = db.scalars(
         select(SensorReading)
         .where(SensorReading.timestamp >= since)
+        .where(SensorReading.timestamp < until)
         .order_by(SensorReading.timestamp.desc())
         .limit(96)
     ).all()
@@ -60,14 +92,17 @@ def get_records(
 @router.get("/timeline", response_model=list[HistoricalRecordOut])
 def get_timeline(
     range: str = Query("week", pattern="^(week|month|custom)$"),
+    start_date: str | None = Query(default=None),
+    end_date: str | None = Query(default=None),
     db: Session = Depends(get_db),
 ):
-    hours = _range_to_hours(range)
-    since = datetime.now() - timedelta(hours=hours)
+    since = _resolve_since(range, start_date, end_date)
+    until = _resolve_until(range, end_date)
 
     readings = db.scalars(
         select(SensorReading)
         .where(SensorReading.timestamp >= since)
+        .where(SensorReading.timestamp < until)
         .order_by(SensorReading.timestamp.desc())
         .limit(48)
     ).all()
@@ -87,14 +122,17 @@ def get_timeline(
 @router.get("/summary", response_model=list[HistoricalSummaryPointOut])
 def get_summary(
     range: str = Query("week", pattern="^(week|month|custom)$"),
+    start_date: str | None = Query(default=None),
+    end_date: str | None = Query(default=None),
     db: Session = Depends(get_db),
 ):
-    hours = _range_to_hours(range)
-    since = datetime.now() - timedelta(hours=hours)
+    since = _resolve_since(range, start_date, end_date)
+    until = _resolve_until(range, end_date)
 
     rows = db.scalars(
         select(SensorReading)
         .where(SensorReading.timestamp >= since)
+        .where(SensorReading.timestamp < until)
         .order_by(SensorReading.timestamp.asc())
     ).all()
 

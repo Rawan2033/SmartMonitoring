@@ -5,23 +5,72 @@ import type { HistoricalRecord, HistoricalSummaryPoint } from "../types";
 
 type Range = "week" | "month" | "custom";
 
+function formatDateInput(date: Date): string {
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, "0");
+  const day = `${date.getDate()}`.padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 export default function HistoricalPage(): JSX.Element {
   const [range, setRange] = useState<Range>("week");
   const [timeline, setTimeline] = useState<HistoricalRecord[]>([]);
   const [records, setRecords] = useState<HistoricalRecord[]>([]);
   const [summary, setSummary] = useState<HistoricalSummaryPoint[]>([]);
+  const [customStartDate, setCustomStartDate] = useState(() => {
+    const date = new Date();
+    date.setDate(date.getDate() - 7);
+    return formatDateInput(date);
+  });
+  const [customEndDate, setCustomEndDate] = useState(() => formatDateInput(new Date()));
+  const [appliedCustomRange, setAppliedCustomRange] = useState(() => {
+    const end = new Date();
+    const start = new Date();
+    start.setDate(start.getDate() - 7);
+    return {
+      startDate: formatDateInput(start),
+      endDate: formatDateInput(end)
+    };
+  });
+  const [errorNotice, setErrorNotice] = useState<string | null>(null);
 
   useEffect(() => {
+    const query =
+      range === "custom"
+        ? { startDate: appliedCustomRange.startDate, endDate: appliedCustomRange.endDate }
+        : {};
+
     Promise.all([
-      api.getHistoricalTimeline(range),
-      api.getHistoricalRecords(range),
-      api.getHistoricalSummary(range)
-    ]).then(([t, r, s]) => {
-      setTimeline(t);
-      setRecords(r);
-      setSummary(s);
-    });
-  }, [range]);
+      api.getHistoricalTimeline(range, query),
+      api.getHistoricalRecords(range, query),
+      api.getHistoricalSummary(range, query)
+    ])
+      .then(([t, r, s]) => {
+        setTimeline(t);
+        setRecords(r);
+        setSummary(s);
+        setErrorNotice(null);
+      })
+      .catch(() => {
+        setTimeline([]);
+        setRecords([]);
+        setSummary([]);
+        setErrorNotice("Could not load historical data for that range. Please check the selected dates.");
+      });
+  }, [range, appliedCustomRange.endDate, appliedCustomRange.startDate]);
+
+  const applyCustomRange = () => {
+    if (!customStartDate || !customEndDate) {
+      setErrorNotice("Please select both a start date and an end date.");
+      return;
+    }
+    if (customStartDate > customEndDate) {
+      setErrorNotice("Start date must be before or equal to end date.");
+      return;
+    }
+    setAppliedCustomRange({ startDate: customStartDate, endDate: customEndDate });
+    setErrorNotice(null);
+  };
 
   return (
     <section>
@@ -44,6 +93,30 @@ export default function HistoricalPage(): JSX.Element {
           Custom
         </button>
       </div>
+      {range === "custom" ? (
+        <div className="custom-range-bar">
+          <label className="settings-field">
+            <span>Start Date</span>
+            <input
+              type="date"
+              value={customStartDate}
+              onChange={(e) => setCustomStartDate(e.target.value)}
+            />
+          </label>
+          <label className="settings-field">
+            <span>End Date</span>
+            <input
+              type="date"
+              value={customEndDate}
+              onChange={(e) => setCustomEndDate(e.target.value)}
+            />
+          </label>
+          <button type="button" className="custom-range-apply" onClick={applyCustomRange}>
+            Apply Range
+          </button>
+        </div>
+      ) : null}
+      {errorNotice ? <div className="insight-alert">{errorNotice}</div> : null}
 
       <article className="panel">
         <h3>Trend Summary</h3>

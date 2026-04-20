@@ -10,6 +10,12 @@ import type {
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api";
 
+type HistoricalRange = "week" | "month" | "custom";
+type HistoricalQuery = {
+  startDate?: string;
+  endDate?: string;
+};
+
 async function getJson<T>(path: string): Promise<T> {
   const response = await fetch(`${API_BASE}${path}`);
   if (!response.ok) {
@@ -50,12 +56,24 @@ export const api = {
 
     return response.json() as Promise<Insight[]>;
   },
-  getHistoricalRecords: (range: "week" | "month" | "custom") =>
-    getJson<HistoricalRecord[]>(`/historical/records?range=${range}`),
-  getHistoricalTimeline: (range: "week" | "month" | "custom") =>
-    getJson<HistoricalRecord[]>(`/historical/timeline?range=${range}`),
-  getHistoricalSummary: (range: "week" | "month" | "custom") =>
-    getJson<HistoricalSummaryPoint[]>(`/historical/summary?range=${range}`),
+  getHistoricalRecords: (range: HistoricalRange, query: HistoricalQuery = {}) => {
+    const params = new URLSearchParams({ range });
+    if (query.startDate) params.set("start_date", query.startDate);
+    if (query.endDate) params.set("end_date", query.endDate);
+    return getJson<HistoricalRecord[]>(`/historical/records?${params.toString()}`);
+  },
+  getHistoricalTimeline: (range: HistoricalRange, query: HistoricalQuery = {}) => {
+    const params = new URLSearchParams({ range });
+    if (query.startDate) params.set("start_date", query.startDate);
+    if (query.endDate) params.set("end_date", query.endDate);
+    return getJson<HistoricalRecord[]>(`/historical/timeline?${params.toString()}`);
+  },
+  getHistoricalSummary: (range: HistoricalRange, query: HistoricalQuery = {}) => {
+    const params = new URLSearchParams({ range });
+    if (query.startDate) params.set("start_date", query.startDate);
+    if (query.endDate) params.set("end_date", query.endDate);
+    return getJson<HistoricalSummaryPoint[]>(`/historical/summary?${params.toString()}`);
+  },
   getSettings: () => getJson<RuntimeSettings>("/settings"),
   updateSettings: (payload: RuntimeSettings) =>
     fetch(`${API_BASE}/settings`, {
