@@ -105,6 +105,8 @@ export default function LineTrendChart({ data }: LineTrendChartProps): JSX.Eleme
       label: d3.timeFormat("%I:%M %p")(new Date(d.timestamp)),
     }));
 
+    const tooltipPadding = 12;
+
     svg
       .append("rect")
       .attr("x", margin.left)
@@ -129,12 +131,21 @@ export default function LineTrendChart({ data }: LineTrendChartProps): JSX.Eleme
         line2.text(`Dust: ${nearest.dust.toFixed(1)}% | Humidity: ${nearest.humidity.toFixed(1)}%`);
         line3.text(`Temperature: ${nearest.temp.toFixed(1)}C`);
 
-        const maxW = Math.max(
+        const tooltipWidth = Math.max(
           (line1.node() as SVGTextElement).getComputedTextLength(),
           (line2.node() as SVGTextElement).getComputedTextLength(),
           (line3.node() as SVGTextElement).getComputedTextLength()
         );
-        tooltipBg.attr("width", Math.max(210, maxW + 18));
+        const resolvedWidth = Math.max(210, tooltipWidth + 18);
+        const showLeft = nearest.x + 10 + resolvedWidth > width - margin.right;
+        const boxX = showLeft ? -(resolvedWidth + tooltipPadding) : tooltipPadding;
+        const textX = boxX + 6;
+
+        tooltip.attr("transform", `translate(${nearest.x},${y(nearest.humidity)})`);
+        tooltipBg.attr("x", boxX).attr("width", resolvedWidth);
+        line1.attr("x", textX).text(nearest.label);
+        line2.attr("x", textX).text(`Dust: ${nearest.dust.toFixed(1)}% | Humidity: ${nearest.humidity.toFixed(1)}%`);
+        line3.attr("x", textX).text(`Temperature: ${nearest.temp.toFixed(1)}C`);
       });
   }, [data, series]);
 

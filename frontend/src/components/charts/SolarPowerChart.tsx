@@ -115,6 +115,8 @@ export default function SolarPowerChart({ data }: SolarPowerChartProps): JSX.Ele
       label: d3.timeFormat("%I:%M %p")(new Date(d.timestamp)),
     }));
 
+    const tooltipPadding = 12;
+
     svg
       .append("rect")
       .attr("x", margin.left)
@@ -135,11 +137,19 @@ export default function SolarPowerChart({ data }: SolarPowerChartProps): JSX.Ele
         tooltipLine1.text(nearest.label);
         tooltipLine2.text(`Solar power: ${nearest.power.toFixed(1)} mW`);
 
-        const maxW = Math.max(
+        const tooltipWidth = Math.max(
           (tooltipLine1.node() as SVGTextElement).getComputedTextLength(),
           (tooltipLine2.node() as SVGTextElement).getComputedTextLength()
         );
-        tooltipBg.attr("width", Math.max(170, maxW + 18));
+        const resolvedWidth = Math.max(170, tooltipWidth + 18);
+        const showLeft = nearest.x + 10 + resolvedWidth > width - margin.right;
+        const boxX = showLeft ? -(resolvedWidth + tooltipPadding) : tooltipPadding;
+        const textX = boxX + 6;
+
+        tooltip.attr("transform", `translate(${nearest.x},${nearest.y})`);
+        tooltipBg.attr("x", boxX).attr("width", resolvedWidth);
+        tooltipLine1.attr("x", textX).text(nearest.label);
+        tooltipLine2.attr("x", textX).text(`Solar power: ${nearest.power.toFixed(1)} mW`);
       });
   }, [data]);
 

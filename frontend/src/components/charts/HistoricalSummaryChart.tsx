@@ -144,6 +144,8 @@ export default function HistoricalSummaryChart({ data }: HistoricalSummaryChartP
       cleaning: d.cleaningActiveCount,
     }));
 
+    const tooltipPadding = 12;
+
     svg
       .append("rect")
       .attr("x", margin.left)
@@ -174,13 +176,23 @@ export default function HistoricalSummaryChart({ data }: HistoricalSummaryChartP
         tooltipLine3.text(`Solar: ${nearest.solar.toFixed(1)} mW`);
         tooltipLine4.text(`Cleaning Active Count: ${nearest.cleaning}`);
 
-        const maxW = Math.max(
+        const tooltipWidth = Math.max(
           (tooltipLine1.node() as SVGTextElement).getComputedTextLength(),
           (tooltipLine2.node() as SVGTextElement).getComputedTextLength(),
           (tooltipLine3.node() as SVGTextElement).getComputedTextLength(),
           (tooltipLine4.node() as SVGTextElement).getComputedTextLength()
         );
-        tooltipBg.attr("width", Math.max(250, maxW + 18));
+        const resolvedWidth = Math.max(250, tooltipWidth + 18);
+        const showLeft = nearest.x + 10 + resolvedWidth > width - margin.right;
+        const boxX = showLeft ? -(resolvedWidth + tooltipPadding) : tooltipPadding;
+        const textX = boxX + 6;
+
+        tooltip.attr("transform", `translate(${nearest.x},${nearest.yHumidity})`);
+        tooltipBg.attr("x", boxX).attr("width", resolvedWidth);
+        tooltipLine1.attr("x", textX).text(`${nearest.label}`);
+        tooltipLine2.attr("x", textX).text(`Dust: ${nearest.dust.toFixed(1)}% | Humidity: ${nearest.humidity.toFixed(1)}%`);
+        tooltipLine3.attr("x", textX).text(`Solar: ${nearest.solar.toFixed(1)} mW`);
+        tooltipLine4.attr("x", textX).text(`Cleaning Active Count: ${nearest.cleaning}`);
       });
   }, [data]);
 

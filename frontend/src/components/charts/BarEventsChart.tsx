@@ -85,6 +85,8 @@ export default function BarEventsChart({ data }: BarEventsChartProps): JSX.Eleme
       .attr("font-size", 11)
       .attr("font-weight", 600);
 
+    const tooltipPadding = 12;
+
     bars
       .on("mouseenter", () => tooltip.style("display", null))
       .on("mouseleave", function () {
@@ -97,10 +99,16 @@ export default function BarEventsChart({ data }: BarEventsChartProps): JSX.Eleme
         const label = d3.timeFormat("%I:%M %p")(new Date(d.timestamp));
 
         d3.select(this).attr("fill", "#129f74");
-        tooltip.attr("transform", `translate(${barX},${barY})`);
         tooltipText.text(`${label} | Events: ${d.count}`);
-        const tw = (tooltipText.node() as SVGTextElement).getComputedTextLength();
-        tooltipBg.attr("width", Math.max(170, tw + 16));
+        const textWidth = (tooltipText.node() as SVGTextElement).getComputedTextLength();
+        const resolvedWidth = Math.max(170, textWidth + 16);
+        const showLeft = barX + 8 + resolvedWidth > width - margin.right;
+        const boxX = showLeft ? -(resolvedWidth + tooltipPadding) : tooltipPadding;
+        const textX = boxX + 6;
+
+        tooltip.attr("transform", `translate(${barX},${barY})`);
+        tooltipBg.attr("x", boxX).attr("width", resolvedWidth);
+        tooltipText.attr("x", textX).text(`${label} | Events: ${d.count}`);
       });
   }, [data]);
 
