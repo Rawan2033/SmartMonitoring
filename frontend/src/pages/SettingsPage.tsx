@@ -3,7 +3,7 @@ import { api } from "../api";
 import type { RuntimeSettings } from "../types";
 
 const DEFAULT_SETTINGS: RuntimeSettings = {
-  cleaningDustThreshold: 35,
+  cleaningDustThreshold: 2137,
   voltageOnThreshold: 0.9,
   insightCooldownSeconds: 60,
   insightDailyCap: 30,
@@ -53,12 +53,12 @@ export default function SettingsPage(): JSX.Element {
         <h3>Cleaning Logic</h3>
         <div className="settings-grid">
           <label className="settings-field">
-            <span>Dust threshold for cleaning trigger (%)</span>
+            <span>Dust threshold for cleaning trigger (raw reflectivity, 0-3000)</span>
             <input
               type="number"
               min={0}
-              max={100}
-              step={0.1}
+              max={3000}
+              step={1}
               value={form.cleaningDustThreshold}
               onChange={(e) => onChange("cleaningDustThreshold", Number(e.target.value))}
             />

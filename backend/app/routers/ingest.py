@@ -14,7 +14,7 @@ class IngestReadingIn(BaseModel):
     temperature_c: float = Field(..., ge=-40, le=125)
     humidity_percent: float = Field(..., ge=0, le=100)
     dust_percent: float | None = Field(default=None, ge=0, le=100)
-    tcrt_raw: int | None = Field(default=None, ge=0, le=4095)
+    tcrt_raw: int | None = Field(default=None, ge=0, le=3000)
     solar_power_mw: float = Field(default=0.0, ge=0)
     cleaning_active: int = Field(default=0, ge=0, le=1)
     timestamp: datetime | None = None
@@ -28,7 +28,7 @@ class IngestReadingIn(BaseModel):
 
 def _dust_from_tcrt_raw(tcrt_raw: int) -> float:
     # Initial linear mapping (to be calibrated with field data later).
-    dust = 100.0 - ((float(tcrt_raw) / 4095.0) * 100.0)
+    dust = 100.0 - ((float(tcrt_raw) / 3000.0) * 100.0)
     return round(max(0.0, min(100.0, dust)), 2)
 
 

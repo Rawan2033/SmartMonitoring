@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field
 
 
 class RuntimeSettings(BaseModel):
-    cleaning_dust_threshold: float = Field(default=35.0, ge=0, le=100)
+    cleaning_dust_threshold: float = Field(default=2137.0, ge=0, le=3000)
     voltage_on_threshold: float = Field(default=0.9, ge=0, le=2)
     insight_cooldown_seconds: int = Field(default=60, ge=5, le=3600)
     insight_daily_cap: int = Field(default=30, ge=1, le=5000)
@@ -26,6 +26,9 @@ def _read_from_disk() -> RuntimeSettings:
     try:
         payload = json.loads(_SETTINGS_FILE.read_text(encoding="utf-8"))
         loaded = RuntimeSettings.model_validate(payload)
+        # Migration: old settings stored dust threshold as a percentage.
+        if loaded.cleaning_dust_threshold <= 100:
+            loaded = loaded.model_copy(update={"cleaning_dust_threshold": 2137.0})
         # Migration: old mock model used low-voltage threshold (e.g., 2.0).
         # New model uses kV-style range (0.0-1.2 nominal).
         if loaded.voltage_on_threshold > 1.2:

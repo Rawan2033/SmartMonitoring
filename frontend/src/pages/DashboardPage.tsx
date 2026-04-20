@@ -117,7 +117,7 @@ export default function DashboardPage(): JSX.Element {
         <KpiCard
           title="Soiling / Dust Index"
           value={`${metrics?.dustPercent.toFixed(1) ?? "0.0"}%`}
-          detail={`Avg raw reading: ${metrics?.reflectivityRawAvg.toFixed(0) ?? "0"} / 4095`}
+          detail={`Avg raw reading: ${metrics?.reflectivityRawAvg.toFixed(0) ?? "0"} / 3000`}
           status={metrics?.statusDust ?? "Moderate"}
           accent="#8f52ff"
           animationDelayMs={60}
