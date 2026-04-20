@@ -71,10 +71,11 @@ export default function HubPage(): JSX.Element {
                     <span className="state-pill">Active</span>
                   </div>
                   <div className="hub-detail-grid">
-                    <div><small>What it measures</small><p>Dust accumulation</p></div>
-                    <div><small>Typical range</small><p>0-100% reflectivity</p></div>
-                    <div><small>Why it matters</small><p>Detects dust buildup on panel surface by measuring light reflection changes.</p></div>
-                    <div><small>Used in dashboard KPI</small><p>Soiling / Dust Index KPI</p></div>
+                    <div><small>What it measures</small><p>Panel-surface reflectivity as an indicator of dust accumulation.</p></div>
+                    <div><small>Typical range</small><p>Raw reflectivity reading from 0-3000, then converted to dust percentage in the platform.</p></div>
+                    <div><small>Why it matters</small><p>Dust buildup changes how much infrared light is reflected back to the sensor, so lower reflectivity helps us detect heavier soiling on the panel surface.</p></div>
+                    <div><small>How we use it</small><p>We use 4 TCRT5000 sensors in total and take the average reading to get one stable reflectivity value for the dashboard.</p></div>
+                    <div><small>Used in dashboard KPI</small><p>Soiling / Dust Index card shows the dust percentage, with the averaged raw reflectivity reading shown below it.</p></div>
                   </div>
                 </article>
 
@@ -92,6 +93,23 @@ export default function HubPage(): JSX.Element {
                     <div><small>Typical range</small><p>Temp: -40C to 125C | Humidity: 0-100% RH</p></div>
                     <div><small>Why it matters</small><p>Explains moisture and heat conditions that influence dust adhesion and efficiency.</p></div>
                     <div><small>Used in dashboard KPI</small><p>Temperature and Humidity cards</p></div>
+                  </div>
+                </article>
+
+                <article className="hub-detail-card">
+                  <div className="hub-detail-top">
+                    <img src="/images/sensors/ina219.svg" alt="INA219 current and power monitoring sensor board" className="sensor-img" />
+                    <div>
+                      <h4>INA219</h4>
+                      <p className="sub">Current / Voltage / Power Sensor</p>
+                    </div>
+                    <span className="state-pill">Active</span>
+                  </div>
+                  <div className="hub-detail-grid">
+                    <div><small>What it measures</small><p>Electrical current and bus voltage, which we use to calculate solar power output.</p></div>
+                    <div><small>Typical range</small><p>Used in the platform as solar power output in mW.</p></div>
+                    <div><small>Why it matters</small><p>Shows whether the panel is producing useful power and helps relate cleaning performance to real output changes.</p></div>
+                    <div><small>Used in dashboard KPI</small><p>Solar Power Output card and the dedicated solar output chart.</p></div>
                   </div>
                 </article>
               </div>

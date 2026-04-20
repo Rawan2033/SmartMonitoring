@@ -146,10 +146,12 @@ button:active:enabled {
   display: grid;
   place-items: center;
   z-index: 90;
-  padding: 20px;
+  padding: 24px;
+  overflow-y: auto;
 }
 .profile-modal {
   width: min(560px, 100%);
+  max-height: calc(100vh - 48px);
   background:
     radial-gradient(circle at top right, rgba(123, 175, 255, 0.18), transparent 28%),
     radial-gradient(circle at bottom left, rgba(122, 222, 167, 0.14), transparent 24%),
@@ -158,6 +160,8 @@ button:active:enabled {
   border-radius: 20px;
   box-shadow: 0 30px 70px rgba(15, 23, 42, 0.28);
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 .profile-modal-head {
   display: flex;
@@ -208,6 +212,7 @@ button:active:enabled {
   padding: 18px 22px 22px;
   display: grid;
   gap: 16px;
+  overflow-y: auto;
 }
 .profile-detail-grid {
   display: grid;
@@ -1199,6 +1204,14 @@ th { font-weight: 700; background: #f7f9ff; }
   .hub-detail-grid, .issue-grid { grid-template-columns: 1fr; }
   .settings-grid { grid-template-columns: 1fr; }
   .profile-detail-grid { grid-template-columns: 1fr; }
+  .profile-modal-backdrop {
+    place-items: start center;
+    padding: 18px 14px;
+  }
+  .profile-modal {
+    max-height: calc(100vh - 36px);
+    border-radius: 16px;
+  }
   .profile-modal-actions {
     flex-direction: column-reverse;
     align-items: stretch;
