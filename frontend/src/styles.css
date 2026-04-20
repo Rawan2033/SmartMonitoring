@@ -129,33 +129,133 @@ button:active:enabled {
   color: #667693;
   font-size: 0.75rem;
 }
-.profile-popover {
-  position: absolute;
-  right: 0;
-  top: calc(100% + 10px);
-  width: 250px;
-  background: #fff;
-  border: 1px solid #d6e0f4;
-  border-radius: 12px;
-  padding: 12px;
-  box-shadow: 0 18px 40px rgba(26, 45, 90, 0.18);
-  z-index: 20;
-}
-.profile-popover p {
-  margin: 0 0 8px;
-  color: #3c4963;
-  font-size: 0.92rem;
-}
-.profile-popover p:last-of-type {
-  margin-bottom: 12px;
-}
 .profile-logout {
-  width: 100%;
   border: 1px solid #d1dbed;
-  background: #f7faff;
-  color: #2f5fc8;
+  background: linear-gradient(135deg, #2b66f6 0%, #1c56da 100%);
+  color: #fff;
   border-radius: 10px;
-  padding: 9px 10px;
+  padding: 10px 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.profile-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(4px);
+  display: grid;
+  place-items: center;
+  z-index: 90;
+  padding: 20px;
+}
+.profile-modal {
+  width: min(560px, 100%);
+  background:
+    radial-gradient(circle at top right, rgba(123, 175, 255, 0.18), transparent 28%),
+    radial-gradient(circle at bottom left, rgba(122, 222, 167, 0.14), transparent 24%),
+    #fff;
+  border: 1px solid #dce4f2;
+  border-radius: 20px;
+  box-shadow: 0 30px 70px rgba(15, 23, 42, 0.28);
+  overflow: hidden;
+}
+.profile-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px 22px 16px;
+  border-bottom: 1px solid #e7edf9;
+}
+.profile-modal-identity {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.profile-modal-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(140deg, #e6eeff 0%, #d7f7e8 100%);
+  border: 1px solid #bfd1f5;
+}
+.profile-modal-avatar svg {
+  width: 28px;
+  height: 28px;
+  fill: #2853ba;
+}
+.profile-modal-head h3 {
+  margin: 0;
+  font-size: 1.55rem;
+}
+.profile-modal-head p {
+  margin: 4px 0 0;
+  color: #65738e;
+}
+.profile-modal-close {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid #d1dbed;
+  background: #fff;
+  color: #44536f;
+  cursor: pointer;
+  font-size: 1rem;
+}
+.profile-modal-content {
+  padding: 18px 22px 22px;
+  display: grid;
+  gap: 16px;
+}
+.profile-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.profile-detail-card {
+  border: 1px solid #dfe6f5;
+  border-radius: 14px;
+  background: rgba(248, 251, 255, 0.92);
+  padding: 12px 14px;
+}
+.profile-detail-card small {
+  color: #75819a;
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+.profile-detail-card p {
+  margin: 6px 0 0;
+  font-size: 1rem;
+  color: #1f2b40;
+}
+.profile-modal-note {
+  border: 1px solid #cfe0ff;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #f7fbff 0%, #eef5ff 100%);
+  padding: 14px 16px;
+}
+.profile-modal-note strong {
+  display: block;
+  margin-bottom: 6px;
+  color: #214eaf;
+}
+.profile-modal-note p {
+  margin: 0;
+  color: #55627d;
+}
+.profile-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.profile-secondary {
+  border: 1px solid #d1dbed;
+  background: #fff;
+  color: #40506d;
+  border-radius: 10px;
+  padding: 10px 14px;
   font-weight: 600;
   cursor: pointer;
 }
@@ -657,10 +757,6 @@ th { font-weight: 700; background: #f7f9ff; }
   .profile-trigger {
     min-width: 200px;
   }
-  .profile-popover {
-    right: auto;
-    left: 0;
-  }
   .dashboard-top-row {
     justify-content: flex-start;
   }
@@ -1080,6 +1176,11 @@ th { font-weight: 700; background: #f7f9ff; }
   .sensor-img { width: 100%; height: 150px; }
   .hub-detail-grid, .issue-grid { grid-template-columns: 1fr; }
   .settings-grid { grid-template-columns: 1fr; }
+  .profile-detail-grid { grid-template-columns: 1fr; }
+  .profile-modal-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
   .custom-range-bar {
     flex-direction: column;
     align-items: stretch;
