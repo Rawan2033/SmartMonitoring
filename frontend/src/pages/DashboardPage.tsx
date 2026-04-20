@@ -139,9 +139,9 @@ export default function DashboardPage(): JSX.Element {
         <KpiCard
           title="Cleaning Active"
           value={metrics?.cleaningActive ? "On" : "Off"}
-          detail="Real ESP cleaning state (0/1)"
+          detail={metrics?.cleaningActive ? "On = cleaning active" : "Off = cleaning inactive"}
           status={metrics?.statusCleaning ?? "Inactive"}
-          accent={metrics?.cleaningActive ? "#13a85e" : "#7b879d"}
+          accent={metrics?.cleaningActive ? "#13a85e" : "#d32a2a"}
           animationDelayMs={270}
         />
         <KpiCard

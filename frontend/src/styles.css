@@ -519,6 +519,28 @@ button:active:enabled {
   font-size: 0.8rem;
   font-weight: 600;
 }
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 54px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1;
+}
+.status-on {
+  color: #117847;
+  background: #e9faef;
+  border-color: #bfe8cd;
+}
+.status-off {
+  color: #b42318;
+  background: #fff1f1;
+  border-color: #f3b4b4;
+}
 .kpi-title { color: #6a7386; margin: 10px 0 4px; }
 .kpi-value { font-size: 2.7rem; margin: 0 0 14px; font-weight: 700; }
 .kpi-detail {

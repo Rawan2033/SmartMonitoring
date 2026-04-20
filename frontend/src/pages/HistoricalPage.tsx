@@ -133,7 +133,7 @@ export default function HistoricalPage(): JSX.Element {
               <div>
                 <strong>{item.eventType}</strong>
                 <p>
-                  Dust: {item.dustPercent.toFixed(1)}% | Temp: {item.temperatureC.toFixed(1)}C | Humidity: {item.humidityPercent.toFixed(1)}% | Solar: {item.solarPowerMw.toFixed(1)} mW | Cleaning: {item.cleaningActive ? "On" : "Off"}
+                  Dust: {item.dustPercent.toFixed(1)}% | Temp: {item.temperatureC.toFixed(1)}C | Humidity: {item.humidityPercent.toFixed(1)}% | Solar: {item.solarPowerMw.toFixed(1)} mW | Cleaning: <span className={`status-pill ${item.cleaningActive ? "status-on" : "status-off"}`}>{item.cleaningActive ? "On" : "Off"}</span>
                 </p>
               </div>
               <time>{item.dateTime}</time>
@@ -163,7 +163,11 @@ export default function HistoricalPage(): JSX.Element {
                   <td>{record.dustPercent.toFixed(1)}</td>
                   <td>{record.temperatureC.toFixed(1)}</td>
                   <td>{record.humidityPercent.toFixed(1)}</td>
-                  <td>{record.cleaningActive ? "On" : "Off"}</td>
+                  <td>
+                    <span className={`status-pill ${record.cleaningActive ? "status-on" : "status-off"}`}>
+                      {record.cleaningActive ? "On" : "Off"}
+                    </span>
+                  </td>
                   <td>{record.solarPowerMw.toFixed(1)}</td>
                 </tr>
               ))}
